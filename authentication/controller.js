@@ -67,8 +67,7 @@ export const logOut = asyncWrapper( async ( req, res ) => {
   if(!req.session.loggedIn){
     throw new CustomError('Invalid request, user not logged in', StatusCodes.BAD_REQUEST)
   }
-  req.session.userId = '';
-  req.session.username = '';
+
   await req.session.destroy();
   // req.session.loggedIn = false;
   res.send('user logged out')

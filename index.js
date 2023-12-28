@@ -4,9 +4,11 @@ import {asyncWrapper, globalErrorHandler} from './utils/index.js';
 import AuthRoute from './authentication/routes.js';
 import UsersRoute from './users/routes.js';
 import ProductRoute from './products/routes.js';
+import CartRoute from './cart/routes.js';
 import session from 'express-session';
 import { redisStore } from './utils/index.js';
-import { validateAuthBody, authMiddleWare } from './middlewares/index.js';
+import { validateAuthBody, authMiddleWare, validateProductBody } from './middlewares/index.js';
+
 
 
 const app = express();
@@ -29,7 +31,8 @@ app.use(session({
 app.use('/auth', validateAuthBody, AuthRoute);
 app.use(authMiddleWare);
 app.use('/users', UsersRoute);
-app.use('/products', ProductRoute)
+app.use('/products', validateProductBody, ProductRoute);
+app.use('/cart', CartRoute);
 
 app.use(globalErrorHandler)
 

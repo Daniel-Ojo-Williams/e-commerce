@@ -6,15 +6,13 @@ class Cart {
   }
 
   // create Cart
-  async createCart(userId){
-    const query = `INSERT INTO cart (userId) VALUES ($1) RETURNING *`
+  async createCart(){
+    const query = `INSERT INTO cart (user_id) VALUES ($1) RETURNING *`
 
-    const { rows } = await db.query(query, [userId]);
+    const { rows } = await db.query(query, [this.userId]);
 
     return rows[0];
   }
-  // add to cart
-  // remove from cart
 }
 
 export default Cart;

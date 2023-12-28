@@ -11,7 +11,7 @@ const authMiddleWare = (req, res, next) => {
       
       throw new CustomError('Authentication required', StatusCodes.UNAUTHORIZED);
     }
-    
+    req.params.id = req.session.userId
     next();
 
   } catch (error) {
