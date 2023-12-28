@@ -1,18 +1,34 @@
-// create user database
-// user authentication
-// 
-
 import express from 'express';
 import pool, { initDb } from './db/connectdb.js';
 import {asyncWrapper, globalErrorHandler} from './utils/index.js';
 import AuthRoute from './authentication/routes.js';
+import UsersRoute from './users/routes.js';
 import ProductRoute from './products/routes.js';
+import session from 'express-session';
+import { redisStore } from './utils/index.js';
+import { validateAuthBody, authMiddleWare } from './middlewares/index.js';
+
 
 const app = express();
 app.use(express.json());
 
+// intialize session storage
+app.use(session({
+  store: redisStore,
+  secret: process.env.REDIS_SECRET,
+  resave: false, // does not save unmodified session
+  saveUninitialized: true, // does not save empty sessions
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    maxAge: 1000 * 60 * 3
+  }
+}));
 
-app.use('/users', AuthRoute);
+
+app.use('/auth', validateAuthBody, AuthRoute);
+app.use(authMiddleWare);
+app.use('/users', UsersRoute);
 app.use('/products', ProductRoute)
 
 app.use(globalErrorHandler)

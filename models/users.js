@@ -16,6 +16,12 @@ class Users {
     return rows[0]
   }
 
+  static async verifyUser(email){
+    const query = `SELECT * FROM users WHERE email = $1`;
+    const {  rows } = await db.query(query, [email]);
+    return rows[0]
+  }
+
   // get all users
   static async getAllUsers(offset=0, fetch=10){
     // --- Get total number of users in users table (user_info view) ---

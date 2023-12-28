@@ -2,10 +2,10 @@ import { CustomError, asyncWrapper } from "../utils/index.js";
 import Users from "../models/users.js";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
-import { request } from "express";
+import jwt from "jsonwebtoken";
 
 // create user
-export const createUser = asyncWrapper(async (req, res) => {
+export const signUp = asyncWrapper(async (req, res) => {
   let { username, password, email, last_name, first_name } = req.body;
 
   // hash password before saving
@@ -13,57 +13,65 @@ export const createUser = asyncWrapper(async (req, res) => {
   password = await bcrypt.hash(password, saltRounds);
 
   let newUser = new Users(username, password, email, last_name, first_name);
-  const result = await newUser.save();
-  res.status(StatusCodes.CREATED).json(result);
-});
+  const user = await newUser.save();
 
-// get a single user profile
-export const getUSer = asyncWrapper(async (req, res) => {
-  let userId = req.params.userId;
-  const user = await Users.getUser(userId);
-  res.status(StatusCodes.OK).json({ data: user });
-});
-
-// get all users
-export const getAllUsers = asyncWrapper(async (req, res) => {
-  let offset = 0;
-  let fetch = 5;
-  let page = req.query?.page;
-
-  offset = (parseInt(page) - 1) * fetch;
-
-  const users = await Users.getAllUsers(offset, fetch);
-
-  let page_count = Math.ceil(users.total / fetch);
-
-  if (page > page_count)
-    throw new CustomError(`Max page is ${page_count}`, StatusCodes.BAD_REQUEST);
+  // session info
+  req.session.userId = user.id;
+  req.session.username = user.username;
+  req.session.loggedIn = true;
 
   res
+    .status(StatusCodes.CREATED)
+    .json({
+      data: {
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+      },
+    });
+});
+
+export const logIn = asyncWrapper(async (req, res) => {
+  let { email, password } = req.body;
+  const user = await Users.verifyUser(email);
+  
+  if (!user) {
+    throw new CustomError(`User does not exist, create an account to get started`, StatusCodes.BAD_REQUEST);
+  }
+  
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  
+  if (!passwordMatch) {
+    throw new CustomError(`Invalid credentials`, StatusCodes.BAD_REQUEST);
+  }
+  
+  req.session.userId = user.id;
+  req.session.username = user.username;
+  req.session.loggedIn = true;
+  
+  res
     .status(StatusCodes.OK)
-    .json({ data: users["users"], pages: `Page: ${page} of ${page_count}` });
+    .json({
+      data: {
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+      },
+    });
 });
 
-// update user
-export const updateUser = asyncWrapper(async (req, res) => {
-  let userId = req.params.userId;
-  let keys = "";
-  let values = Object.values(req.body);
+// clear session info when user logs out
+export const logOut = asyncWrapper( async ( req, res ) => {
+  if(!req.session.loggedIn){
+    throw new CustomError('Invalid request, user not logged in', StatusCodes.BAD_REQUEST)
+  }
+  req.session.userId = '';
+  req.session.username = '';
+  await req.session.destroy();
+  // req.session.loggedIn = false;
+  res.send('user logged out')
+})
 
-  Object.keys(req.body).forEach((each, i) => {
-    keys += `${each} = $${i + 1}, `;
-  });
 
-  keys = keys.slice(0, -2);
-
-  const user = await Users.updateUser(userId, keys, values);
-  res.status(StatusCodes.OK).json({data: user});
-});
-
-// delete user
-export const deleteUser = asyncWrapper(async (req, res) => {
-  const userId = req.params.userId;
-
-  await Users.deleteUser(userId);
-  res.status(StatusCodes.OK).json({data: 'User deleted successfully'})
-});
