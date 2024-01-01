@@ -8,7 +8,7 @@ To access the API endpoints, you need to understand the available routes, their 
 
 ### Base URL
 
-The base URL for accessing the API is: `https://example.com`
+The base URL for accessing the API is: `https://localhost.com:3000`. PORT: 3000 || as stated in the process.env.PORT
 
 ### Authentication
 
