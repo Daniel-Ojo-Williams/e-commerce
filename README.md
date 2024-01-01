@@ -99,27 +99,33 @@ Global error handling is in place to capture and handle errors across the API. E
 
 #### `/cart`
 
+- **GET** `/cart`
+  - Endpoint to create a new cart for a user.
+  - Requires authentication.
+  - Response:
+    - cart info {cart_id}.
+
 - **GET** `/cart/checkout`
   - Endpoint to view items in the cart and calculate the checkout total.
   - Requires authentication.
   - Response:
     - List of items in the cart and total checkout amount.
 
-- **POST** `/cart/add`
+- **POST** `/cart`
   - Endpoint to add an item to the cart.
   - Request:
     - JSON payload with item details.
   - Response:
     - Success message or error for invalid data.
 
-- **PUT** `/cart/update`
+- **PUT** `/cart`
   - Endpoint to update the quantity of an item in the cart.
   - Request:
     - JSON payload with updated quantity and item ID.
   - Response:
     - Success message or error for invalid data.
 
-- **DELETE** `/cart/remove`
+- **DELETE** `/cart`
   - Endpoint to remove an item from the cart.
   - Request:
     - JSON payload with item ID.
