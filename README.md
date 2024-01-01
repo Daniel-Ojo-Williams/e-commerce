@@ -83,13 +83,28 @@ Global error handling is in place to capture and handle errors across the API. E
 
 #### `/products`
 
-- **GET** `/products`
+- **GET** `/products/allProducts`
   - Endpoint to retrieve a list of products.
+  - Add query for pagination i.e. page=1, will return BIGINT error without the query
   - Response:
     - List of available products.
 
-- **POST** `/products/add`
+- **POST** `/products/new`
   - Endpoint to add a new product.
+  - Request:
+    - JSON payload with product details.
+  - Response:
+    - Success message or error for invalid data.
+
+- **PUT** `/products/{productId}`
+  - Endpoint to update an existing product.
+  - Request:
+    - JSON payload with product details.
+  - Response:
+    - Success message or error for invalid data.
+
+- **DELETE** `/products/{productId}`
+  - Endpoint to remvoe a product from the database.
   - Request:
     - JSON payload with product details.
   - Response:
