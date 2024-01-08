@@ -1,0 +1,11 @@
+{
+  "dev": {
+    "driver": "pg",
+    "user": "freakydmuse",
+    "password": "Owdanny400",
+    "host": "localhost",
+    "database": "e-commerce",
+    "port": 5432
+  },
+  "sql-file": true
+}
