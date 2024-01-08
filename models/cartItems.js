@@ -21,10 +21,16 @@ class CartItems{
     return rowCount;
   }
 
-  static async updateProductQuantity(productId, cartId, quantity){
-    const query = `UPDATE cart_items SET quantity = $1, modified_at = now() WHERE product_id = $2 and cart_id = $3 RETURNING *`;
-    const { rows } = await db.query(query, [quantity, productId, cartId]);
-    return rows[0]
+  static async increaseProductQuantity(productId, cartId){
+    const query =`UPDATE cart_items SET quantity = quantity + 1 WHERE cart_id = $1 and product_id = $2 RETURNING *`;
+    const { rows } = await db.query(query, [cartId, productId]);
+    return rows[0];
+  }
+
+  static async decreaseProductQuantity(productId, cartId){
+    const query =`UPDATE cart_items SET quantity = quantity - 1 WHERE cart_id = $1 and product_id = $2 RETURNING *`;
+    const { rows } = await db.query(query, [cartId, productId]);
+    return rows[0];
   }
 }
 

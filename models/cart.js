@@ -3,13 +3,13 @@ import db from "../db/connectdb.js";
 class Cart {
   constructor(userId){
     this.userId = userId;
-  }
+  } 
 
-  // create Cart
-  async createCart(){
-    const query = `INSERT INTO cart (user_id) VALUES ($1) RETURNING *`
+  // retrieve Cart id 
+  static async getCartId(userId){
+    const query = `SELECT FROM cart WHERE user_id = $1`
 
-    const { rows } = await db.query(query, [this.userId]);
+    const { rows } = await db.query(query, [userId]);
 
     return rows[0];
   }

@@ -4,7 +4,10 @@ Welcome to the documentation for the E-Commerce API, an application designed to 
 
 ## Getting Started
 
-To access the API endpoints, you need to understand the available routes, their functionalities, and the expected request and response formats.
+To access the API endpoints, you need to haave redis installed on your pc and install dependencies.
+```
+npm install
+```
 
 ### Base URL
 

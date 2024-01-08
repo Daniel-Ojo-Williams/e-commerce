@@ -1,10 +1,10 @@
 import express from 'express';
 import pool, { initDb } from './db/connectdb.js';
 import {asyncWrapper, globalErrorHandler} from './utils/index.js';
-import AuthRoute from './authentication/routes.js';
-import UsersRoute from './users/routes.js';
-import ProductRoute from './products/routes.js';
-import CartRoute from './cart/routes.js';
+import AuthRoute from './src/authentication/routes.js';
+import UsersRoute from './src/users/routes.js';
+import ProductRoute from './src/products/routes.js';
+import CartRoute from './src/cart/routes.js';
 import session from 'express-session';
 import { redisStore } from './utils/index.js';
 import { validateAuthBody, authMiddleWare, validateProductBody } from './middlewares/index.js';
