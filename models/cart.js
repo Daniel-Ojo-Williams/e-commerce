@@ -7,7 +7,7 @@ class Cart {
 
   // retrieve Cart id 
   static async getCartId(userId){
-    const query = `SELECT FROM cart WHERE user_id = $1`
+    const query = `SELECT id FROM cart WHERE user_id = $1`
 
     const { rows } = await db.query(query, [userId]);
 

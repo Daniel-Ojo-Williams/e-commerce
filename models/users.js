@@ -11,7 +11,7 @@ class Users {
 
   // get user
   static async getUser(userId){
-    const query = `SELECT * FROM user_info WHERE id = $1`;
+    const query = `SELECT * FROM user_info WHERE user_id = $1`;
     const { rows } = await db.query(query, [userId]);
     return rows[0]
   }
@@ -27,7 +27,7 @@ class Users {
     // --- Get total number of users in users table (user_info view) ---
     const { rows } = await db.query(`SELECT COUNT(*) FROM user_info`);
     const { count: total } = rows[0];
-    const query = `SELECT * FROM user_info ORDER BY id ASC OFFSET $1 FETCH FIRST $2 ROWS ONLY `;
+    const query = `SELECT * FROM user_info OFFSET $1 FETCH FIRST $2 ROWS ONLY`;
     const { rows: users } = await db.query(query, [offset, fetch]);
     return { users, total };
   }
@@ -41,7 +41,7 @@ class Users {
   static async updateUser(userId, keys, values){
     const query = `
     UPDATE users
-    SET ${keys}, modified_at = now() WHERE id = $${values.length + 1}
+    SET ${keys}, modified_at = now() WHERE user_id = $${values.length + 1}
     RETURNING *
     `
     const { rows } = await db.query(query, [...values, userId])
@@ -51,7 +51,7 @@ class Users {
 
   // delete user
   static async deleteUser(userId){
-    const query = `DELETE FROM users WHERE id = $1`
+    const query = `DELETE FROM users WHERE user_id = $1`
 
     const response = await db.query(query, [userId])
 

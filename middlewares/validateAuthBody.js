@@ -20,22 +20,22 @@ const validateAuthBody = (req, res, next) => {
       );
     }
 
-    if(req.path === '/auth/signin'){
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{6,}$/;
+
+    if (!passwordRegex.test(password)) {
+      throw new CustomError(
+        "Invalid password format, password muust be at least 6 characters long, contain at least one uppercase letter, one special character and digit",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    if (req.path === "/auth/login") {
       next();
     }
 
     if (!username || username.length < 5) {
       throw new CustomError(
         "Username must be at least 5 characters long",
-        StatusCodes.BAD_REQUEST
-      );
-    }
-
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{6,}$/;
-
-    if (!passwordRegex.test(password)) {
-      throw new CustomError(
-        "Invalid password format, password muust be at least 6 characters long, contain at least one uppercase letter, one special character and digit",
         StatusCodes.BAD_REQUEST
       );
     }

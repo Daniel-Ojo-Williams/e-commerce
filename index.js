@@ -8,11 +8,14 @@ import CartRoute from './src/cart/routes.js';
 import session from 'express-session';
 import { redisStore } from './utils/index.js';
 import { validateAuthBody, authMiddleWare, validateProductBody } from './middlewares/index.js';
+import cookieParser from 'cookie-parser';
 
 
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
+
 
 // intialize session storage
 app.use(session({
