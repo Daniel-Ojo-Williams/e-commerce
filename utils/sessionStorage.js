@@ -3,7 +3,7 @@ import { createClient } from "redis";
 import "dotenv/config";
 
 // initialize redis client
-const redisClient = createClient({
+export const redisClient = createClient({
   port: 6379,
   host: "localhost",
 });

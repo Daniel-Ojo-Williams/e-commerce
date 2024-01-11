@@ -11,14 +11,15 @@ const refreshToken = async (req, res) => {
 
   let refresh_token = req.cookies?.refresh_token;
 
+  if(!refresh_token) {
+    throw new CustomError('Could not pass access token please authenticate again', StatusCodes.UNAUTHORIZED);
+  }
+  
   let refresh_token_hash = await RefreshToken.getReFreshToken(userId);
   if(!refresh_token.expires_in < Date.now()) {
     throw new CustomError('Could not pass access token please authenticate again', StatusCodes.UNAUTHORIZED);
   }
 
-  if(!refresh_token) {
-    throw new CustomError('Could not pass access token please authenticate again', StatusCodes.UNAUTHORIZED);
-  }
   
   // if refresh token is still valid compare it with the refresh token from the client
   let refresh_token_match = await bcrypt.compare(refresh_token, refresh_token_hash);

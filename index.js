@@ -9,7 +9,7 @@ import session from 'express-session';
 import { redisStore } from './utils/index.js';
 import { validateAuthBody, authMiddleWare, validateProductBody } from './middlewares/index.js';
 import cookieParser from 'cookie-parser';
-
+import rateLimiter from "./middlewares/rateLimiter.js";
 
 
 const app = express();
@@ -31,7 +31,7 @@ app.use(session({
 }));
 
 
-app.use('/auth', validateAuthBody, AuthRoute);
+app.use('/auth', rateLimiter(), validateAuthBody, AuthRoute);
 app.use(authMiddleWare);
 app.use('/users', UsersRoute);
 app.use('/products', validateProductBody, ProductRoute);
