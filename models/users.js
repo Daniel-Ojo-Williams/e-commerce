@@ -22,6 +22,11 @@ class Users {
     return rows[0]
   }
 
+  static async verifyEmail(userId){
+    const query = `UPDATE users SET verified = true WHERE user_id = $1`;
+    await db.query(query, [userId]);
+  }
+
   // get all users
   static async getAllUsers(offset=0, fetch=10){
     // --- Get total number of users in users table (user_info view) ---

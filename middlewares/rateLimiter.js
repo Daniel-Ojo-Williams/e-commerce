@@ -42,8 +42,6 @@ const rateLimiter = (identifier='') => {
     } catch (error) {
       console.log(error.message);
     }
-
-
   }
 }
 
