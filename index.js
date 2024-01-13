@@ -10,7 +10,7 @@ import { redisStore } from './utils/index.js';
 import { validateAuthBody, authMiddleWare, validateProductBody } from './middlewares/index.js';
 import cookieParser from 'cookie-parser';
 import rateLimiter from "./middlewares/rateLimiter.js";
-import { emailTokenVerification } from './src/authentication/controller.js';
+import { emailTokenVerification } from './utils/emailVerification.js';
 
 
 const app = express();
