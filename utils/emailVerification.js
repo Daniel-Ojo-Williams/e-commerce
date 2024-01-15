@@ -19,27 +19,33 @@ let transporter = nodemailer.createTransport({
 });
 
 // email verification function
-const emailVerification = asyncWrapper(async (user) => {
+const sendMail = async ({user={}, email='', content='', subject='', title=''}) => {
+  
   // generate verification token with user_id
   let token = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, {
     expiresIn: "10m",
   });
+
   let link = `http://localhost:3000/verify/${token}`;
+  let defaultContent = `<p>Welcome to E-commerce App ${user.first_name} ${user.last_name}</p><br/><p>Here is your verification link, click <a href=${link} >here<a/> to verify. The link expires in 10 minutes.</p>`;
+  let defaultSubject = "E-commerce App: Welcome to E-commerce App";
+  let fromTitle = title || 'Email verification';
+
   let message = {
-    from: "Email verification <freakydmuse@gmail.com>",
-    to: user.email,
-    subject: "E-commerce App: Welcome to E-commerce App",
-    html: `<p>Welcome to E-commerce App ${user.first_name + ' ' + user.last_name}</p><br/><p>Here is your verification link, click <a href=${link} >here<a/> to verify. The link expires in 10 minutes.</p>`,
+    from: `${fromTitle} <freakydmuse@gmail.com>`,
+    to: email || user.email,
+    subject: subject || defaultSubject,
+    html: content || defaultContent,
   };
 
   try {
     const response = await transporter.sendMail(message);
     
   } catch (error) {
-    
-    throw new CustomError('Sorry an error occurred while registering, please try again')
+    console.log(error.message)
+    throw new CustomError('Sorry an error occurred, please try again')
   }
-});
+};
 
 // verify token from email
 export const emailTokenVerification = asyncWrapper(async (req, res) => {
@@ -56,4 +62,4 @@ export const emailTokenVerification = asyncWrapper(async (req, res) => {
   res.send('Account verified successfully');
 });
 
-export default emailVerification;
+export default sendMail;

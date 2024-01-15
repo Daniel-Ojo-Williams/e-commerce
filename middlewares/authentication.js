@@ -7,7 +7,7 @@ import 'dotenv/config.js';
 import { GenerateTokenFunction } from "../src/authentication/controller.js";
 
 
-const refreshToken = async (req, res) => {
+const refreshToken = asyncWrapper(async (req, res) => {
 
   let refresh_token = req.cookies?.refresh_token;
 
@@ -29,11 +29,10 @@ const refreshToken = async (req, res) => {
   }
 
   return jwt.verify(refresh_token, process.env.JWT_SECRET)
-};
+});
 
 
-const authMiddleWare = async (req, res, next) => {
-  try {
+const authMiddleWare = asyncWrapper(async (req, res, next) => {
     
     let loggedIn = req.session?.loggedIn
 
@@ -47,7 +46,7 @@ const authMiddleWare = async (req, res, next) => {
       const user = refreshToken(req, res);
 
       if(!user){
-        throw new CustomError('Could not pass access token please authenticate again', StatusCodes.UNAUTHORIZED);
+        throw new CustomError('Could not parse access token please authenticate again', StatusCodes.UNAUTHORIZED);
       }
       let userId = user?.userId;
 
@@ -65,14 +64,11 @@ const authMiddleWare = async (req, res, next) => {
 
     if(!loggedIn) {
       
-      throw new CustomError('Authentication required', StatusCodes.UNAUTHORIZED);
+      // throw new CustomError('Authentication required', StatusCodes.UNAUTHORIZED);
+      return next(new CustomError('Authentication required', StatusCodes.UNAUTHORIZED));
     }
     req.params.id = req.session.userId
     next();
-
-  } catch (error) {
-    next(error);
-  }
-}
+});
 
 export default authMiddleWare;

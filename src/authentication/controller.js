@@ -34,7 +34,7 @@ export const signUp = asyncWrapper(async (req, res) => {
   let newUser = new Users(username, password, email, last_name, first_name);
   const user = await newUser.save();
 
-  await emailVerification(user);
+  await emailVerification({user});
 
   res.status(StatusCodes.CREATED).json({
     data: {

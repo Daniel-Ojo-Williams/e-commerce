@@ -18,7 +18,7 @@ class Users {
 
   static async verifyUser(email){
     const query = `SELECT * FROM users WHERE email = $1`;
-    const {  rows } = await db.query(query, [email]);
+    const { rows } = await db.query(query, [email]);
     return rows[0]
   }
 
@@ -52,7 +52,12 @@ class Users {
     const { rows } = await db.query(query, [...values, userId])
     return rows[0]
   }
-  // change password
+
+  static async resetPassword(userId, password){
+    const query = `UPDATE users SET password = $1, modified_at = now() WHERE user_id = $2`;
+
+    await db.query(query, [password, userId])
+  }
 
   // delete user
   static async deleteUser(userId){
