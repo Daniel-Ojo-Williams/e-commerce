@@ -12,11 +12,11 @@ function globalErrorHandler(error, req, res, next){
     if(error.message == 'jwt expired'){
       message = `Could not parse token, Token expired. Please try again.`
     }
-    
+
     return res.status(statusCode).json(message)
 
   } catch (error) {
-    console.error(error.message)
+
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json('Sorry and error occured. Please try again')
   }
 }

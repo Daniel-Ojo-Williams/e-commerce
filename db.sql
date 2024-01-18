@@ -9,3 +9,23 @@ BEGIN
   
   EXECUTE format('CREATE VIEW user_info AS SELECT %s FROM users', column_list);
 END $$;
+
+insert into
+  order_items (
+    product_id,
+    product_name,
+    price_per_unit,
+    quantity,
+    order_id
+  )
+select
+  p.id,
+  p.name,
+  p.price,
+  ci.quantity
+from
+  products p
+  join cart_items ci on p.id = ci.product_id
+  join orders on user_id = $1
+where
+  ci.cart_id = $2

@@ -53,12 +53,6 @@ class Users {
     return rows[0]
   }
 
-  static async resetPassword(userId, password){
-    const query = `UPDATE users SET password = $1, modified_at = now() WHERE user_id = $2`;
-
-    await db.query(query, [password, userId])
-  }
-
   // delete user
   static async deleteUser(userId){
     const query = `DELETE FROM users WHERE user_id = $1`

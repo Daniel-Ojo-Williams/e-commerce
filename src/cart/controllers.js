@@ -3,10 +3,12 @@ import Cart from "../../models/cart.js";
 import { CustomError, asyncWrapper } from "../../utils/index.js";
 import CartItems from "../../models/cartItems.js";
 
-
 export const addItemToCart = asyncWrapper( async (req, res) => {
   
-  let { productId, cartId, quantity } = req.body;
+  let { productId, quantity } = req.body;
+  let cartId = req.session?.cartId;
+  quantity = quantity || 1;
+  console.log(quantity);
   let newCartItem = new CartItems(productId, cartId, quantity);
   let response = await newCartItem.addItemToCart();
   res.status(StatusCodes.CREATED).json({data: response});
@@ -38,9 +40,18 @@ export const removeFromCart = asyncWrapper( async (req, res) => {
 })
 
 export const viewCart = asyncWrapper( async (req, res) => {
-  let { cartId } = req.body;
-  console.log(cartId)
-  let { checkout, rows } = await Cart.viewCart(cartId);
-  res.status(StatusCodes.OK).json({data: {checkout: checkout[0].checkout, products: rows}});
+  let cartId = req.session?.cartId;
+  
+  let { summary, rows } = await Cart.viewCart(cartId);
+  
+  res.status(StatusCodes.OK).json({data: {checkout: summary[0].summary, products: rows}});
+})
+
+export const checkout = asyncWrapper( async ( req, res) => {
+  // name of the product
+  // quantity
+  // price_per_unit 
+  // total price/summary
+  // let {  }
 })
 

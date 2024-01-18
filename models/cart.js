@@ -22,14 +22,14 @@ class Cart {
     `;
 
     const checkoutQuery = `
-    SELECT checkout
+    SELECT summary
     FROM cart
     WHERE cart.id = $1
     `
 
-    const { rows: checkout } = await db.query(checkoutQuery, [cartId])
+    const { rows: summary } = await db.query(checkoutQuery, [cartId])
     const { rows } = await db.query(query, [cartId]);
-    return { checkout, rows };
+    return { summary, rows };
   }
 }
 

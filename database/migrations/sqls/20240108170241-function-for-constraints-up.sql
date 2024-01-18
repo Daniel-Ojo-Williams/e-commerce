@@ -5,7 +5,7 @@ BEGIN -- Update cart checkout column based on insert into cart_items quantity co
 UPDATE
   cart c
 SET
-  checkout = (
+  summary = (
     SELECT
       COALESCE(SUM(ci.quantity * p.price), 0)
     FROM
@@ -29,7 +29,7 @@ AND NEW.price <> OLD.price THEN
 UPDATE
   cart c
 SET
-  checkout = (
+  summary = (
     SELECT
       COALESCE(SUM(ci.quantity * p.price), 0)
     FROM
