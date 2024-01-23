@@ -1,4 +1,7 @@
-/* Replace with your SQL commands */
+
+exports.up = function(knex) {
+  return knex.raw(
+    `/* Replace with your SQL commands */
 CREATE
 OR REPLACE FUNCTION cart_checkout_update() RETURNS TRIGGER AS $$ 
 BEGIN -- Update cart checkout column based on insert into cart_items quantity column
@@ -72,4 +75,10 @@ CREATE
 OR REPLACE TRIGGER update_cart_checkout_update
 AFTER
 UPDATE
-  OF quantity ON cart_items FOR EACH ROW EXECUTE FUNCTION cart_checkout_update();
+  OF quantity ON cart_items FOR EACH ROW EXECUTE FUNCTION cart_checkout_update();`
+  );
+};
+
+exports.down = function(knex) {
+  
+};

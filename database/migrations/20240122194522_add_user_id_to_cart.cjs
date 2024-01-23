@@ -1,5 +1,6 @@
-/* Replace with your SQL commands */
--- create a trigger that  automatically creates an entry in the cart table for each new user created.
+exports.up = function (knex) {
+  return knex.raw(
+    `-- create a trigger that  automatically creates an entry in the cart table for each new user created.
 
 CREATE OR REPLACE FUNCTION create_cart_entry()
 RETURNS TRIGGER AS $$
@@ -12,4 +13,8 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER new_user_cart_trigger
 AFTER INSERT ON users
 FOR EACH ROW
-EXECUTE FUNCTION create_cart_entry();
+EXECUTE FUNCTION create_cart_entry();`
+  );
+};
+
+exports.down = function (knex) {};

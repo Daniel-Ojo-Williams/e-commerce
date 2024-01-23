@@ -4,7 +4,9 @@ Welcome to the documentation for the E-Commerce API, an application designed to 
 
 ## Getting Started
 
-To access the API endpoints, you need to haave redis installed on your pc and install dependencies.
+To access the API endpoints, you need to haave redis and postgresql installed and running, you can also use containers or cloud.
+
+Install npm dependencies.
 ```
 npm install
 ```
