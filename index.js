@@ -1,5 +1,5 @@
 import express from "express";
-import { initDb } from "./db/connectdb.js";
+import db, { initDb } from "./db/connectdb.js";
 import { globalErrorHandler } from "./utils/index.js";
 import {
   AuthRoute,
@@ -9,45 +9,29 @@ import {
   OrderRoute,
 } from "./src/index.js";
 
-import session from "express-session";
 import { redisStore } from "./utils/index.js";
 import {
   validateAuthBody,
   authMiddleWare,
   validateProductBody,
+  sessionMiddleware,
 } from "./middlewares/index.js";
 import cookieParser from "cookie-parser";
 import rateLimiter from "./middlewares/rateLimiter.js";
 import { emailTokenVerification } from "./utils/emailVerification.js";
 import OTPRouter from "./src/resetPassword/routes.js";
 
+
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// intialize session storage
-app.use(
-  session({
-    store: redisStore,
-    secret: process.env.REDIS_SECRET,
-    resave: false, // does not save unmodified session
-    saveUninitialized: true, // does not save empty sessions
-    cookie: {
-      secure: false,
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 5,
-    },
-  })
-);
 
-app.use((req, res, next) => {
-  req.session.touch();
-  next();
-});
 app.use("/", OTPRouter);
 app.use("/auth", rateLimiter(), validateAuthBody, AuthRoute);
 app.use("/verify/:token", emailTokenVerification);
-
+app.use(sessionMiddleware)
 app.use("/users", authMiddleWare, UsersRoute);
 app.use("/products", authMiddleWare, validateProductBody, ProductRoute);
 app.use("/cart", authMiddleWare, CartRoute);

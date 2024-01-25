@@ -40,7 +40,10 @@ export const removeFromCart = asyncWrapper( async (req, res) => {
 })
 
 export const viewCart = asyncWrapper( async (req, res) => {
-  let cartId = req.session?.cartId;
+  let user = req.user
+  
+  let cartId = user.cart_id;
+  
   
   let { summary, rows } = await Cart.viewCart(cartId);
   

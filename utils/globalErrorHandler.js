@@ -9,9 +9,12 @@ function globalErrorHandler(error, req, res, next){
       const email = error.detail.split('=')[1].split(' ')[0]
       message = `An account with this email address ${email} already exists. Please try again.`
     }
-    if(error.message == 'jwt expired'){
-      message = `Could not parse token, Token expired. Please try again.`
+    if(error.message == 'jwt expired' || error.message == 'jwt malformed'){
+      message = `Could not parse token, Access token expired.`;
+      statusCode = StatusCodes.UNAUTHORIZED;
     }
+
+    console.log(error)
 
     return res.status(statusCode).json(message)
 

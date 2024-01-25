@@ -1,88 +1,87 @@
 import { StatusCodes } from "http-status-codes";
 import { CustomError, asyncWrapper } from "../utils/index.js";
-import jwt from 'jsonwebtoken'
-import RefreshToken from "../models/refreshToken.js";
-import bcrypt from 'bcrypt';
-import 'dotenv/config.js';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import "dotenv/config.js";
 import { GenerateTokenFunction } from "../src/authentication/controller.js";
-
-
-const refreshToken = async (req) => {
-try {
-  
-  let refresh_token = req.cookies?.refresh_token;
-
-  if (!refresh_token) {
-    throw new CustomError(
-      "Could not pass access token please authenticate again",
-      StatusCodes.UNAUTHORIZED
-    );
-  }
-
-  let refresh_token_hash = await RefreshToken.getReFreshToken(userId);
-  if (!refresh_token.expires_in < Date.now()) {
-    throw new CustomError(
-      "Could not pass access token please authenticate again",
-      StatusCodes.UNAUTHORIZED
-    );
-  }
-
-  // if refresh token is still valid compare it with the refresh token from the client
-  let refresh_token_match = await bcrypt.compare(
-    refresh_token,
-    refresh_token_hash
-  );
-
-  if (!refresh_token_match) {
-    throw new CustomError(
-      "Could not pass access token please authenticate again",
-      StatusCodes.UNAUTHORIZED
-    );
-  }
-
-  return jwt.verify(refresh_token, process.env.JWT_SECRET);
-} catch (error) {
-  
-  return error
-}
-};
-
+import "dotenv/config.js";
 
 const authMiddleWare = asyncWrapper(async (req, res, next) => {
-    
-    let loggedIn = req.session?.loggedIn
+  // check for session id in cookie
+  let sessionId = req.cookies.sid;
+  if (!sessionId)
+    return next(new CustomError("Session not found", StatusCodes.UNAUTHORIZED));
 
-  if(!loggedIn) {
-      
-      // throw new CustomError('Authentication required', StatusCodes.UNAUTHORIZED);
-      return next(new CustomError('Authentication required', StatusCodes.UNAUTHORIZED));
-    }
-    
-    // check if there is access token available
-    let access_token = req.cookies?.access_token;
-    
-    
-    // if access token not available check if refresh token in db is still valid
-    if(!access_token) {
-      
-      const user = refreshToken(req).catch(error => next(error));    
+  // check if there is access token available in authorization header
+  let authHeader = req.headers["authorization"].split(" ");
+  let access_token = authHeader[1];
 
-      let userId = user?.userId;
+  if (!access_token)
+    return next(
+      new CustomError(
+        "No access token, Authentication required",
+        StatusCodes.UNAUTHORIZED
+      )
+    );
 
-      access_token = GenerateTokenFunction(userId, 'access_token');
-
-      res.cookie("access_token", access_token, {
-        httpOnly: true,
-        path: "/",
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1),
-        sameSite: "lax",
-      });
-    }
+  // verify access_token
+  let user;
+  try {
+    const decoded = jwt.verify(access_token, process.env.JWT_SECRET)
+    user = decoded.user;
     
+  } catch (error) {
+    if(error.message == 'jwt expired') return next(new CustomError('TokenExpiredError', StatusCodes.UNAUTHORIZED));
+  }
+    
+
   
-
-    req.params.id = req.session.userId
-    next();
+  // passess the user object decoded from the access token to the next endpoint
+  req.user = user;
+  next();
 });
 
 export default authMiddleWare;
+
+const refreshTokenEndpoint = async (req, res) => {
+  // if access token not available check if refresh token in db is still valid
+  if (!access_token) {
+    const user = refreshToken(req).catch((error) => next(error));
+
+    let userId = user?.userId;
+
+    access_token = GenerateTokenFunction(userId, "access_token");
+
+    res.cookie("access_token", access_token, {
+      httpOnly: true,
+      path: "/",
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1),
+      sameSite: "lax",
+    });
+  }
+};
+
+// check for session id and access token
+// if no session id, request authentication
+// if session id, check for access_token
+// if no access token, request authentication
+// if access_token is expired, check for refresh_token
+// if refresh_token, generate new access_token and refresh_token
+
+// Check for session ID:
+//     If no session ID, request authentication.
+//     If session ID found, validate it against the database:
+//         If valid, retrieve associated session data (including user_id).
+//         If invalid or missing user_id, treat as no session and request authentication.
+
+// Check for access token:
+//     If no access token, request authentication.
+//     If access token found, check expiration:
+//         If expired, proceed to refresh token logic.
+//         If not expired, validate token signature/claims (optional) and use for authorization.
+
+// Refresh token logic:
+//     If refresh token found, generate new access token and refresh token.
+//         Invalidate old refresh token in the database.
+//         Store new refresh token with updated expiration.
+//         Consider rate limiting or other security measures.

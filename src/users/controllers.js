@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 
 // get a single user profile
 export const getUSer = asyncWrapper(async (req, res) => {
-  let userId = req.params.userId;
+  let userId = req.session.user_id;
   const user = await Users.getUser(userId);
   res.status(StatusCodes.OK).json({ data: user });
 });
