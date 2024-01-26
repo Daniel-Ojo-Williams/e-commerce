@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { CustomError, asyncWrapper } from "../utils/index.js";
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import "dotenv/config.js";
 import { GenerateTokenFunction } from "../src/authentication/controller.js";
@@ -28,6 +28,7 @@ const authMiddleWare = asyncWrapper(async (req, res, next) => {
   let user;
   try {
     const decoded = jwt.verify(access_token, process.env.JWT_SECRET)
+    console.log(decoded)
     user = decoded.user;
     
   } catch (error) {
@@ -43,23 +44,7 @@ const authMiddleWare = asyncWrapper(async (req, res, next) => {
 
 export default authMiddleWare;
 
-const refreshTokenEndpoint = async (req, res) => {
-  // if access token not available check if refresh token in db is still valid
-  if (!access_token) {
-    const user = refreshToken(req).catch((error) => next(error));
 
-    let userId = user?.userId;
-
-    access_token = GenerateTokenFunction(userId, "access_token");
-
-    res.cookie("access_token", access_token, {
-      httpOnly: true,
-      path: "/",
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1),
-      sameSite: "lax",
-    });
-  }
-};
 
 // check for session id and access token
 // if no session id, request authentication

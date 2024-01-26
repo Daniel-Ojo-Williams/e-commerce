@@ -14,7 +14,6 @@ function globalErrorHandler(error, req, res, next){
       statusCode = StatusCodes.UNAUTHORIZED;
     }
 
-    console.log(error)
 
     return res.status(statusCode).json(message)
 

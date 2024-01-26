@@ -1,9 +1,8 @@
 import { redisClient as Redis } from "../utils/sessionStorage.js";
 
-const MINUTES_IN_A_WINDOW = 60000;
-const REQUEST_PER_WINDOW = 5;
 
-const rateLimiter = (identifier='') => {
+
+const rateLimiter = ({identifier='', request_per_window, minutes_in_a_window} = {}) => {
   return async (req, res, next) => {
     try {
       const user = identifier || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
@@ -21,6 +20,9 @@ const rateLimiter = (identifier='') => {
       }
       
       let diff = currentTime - parseInt(result.createdAt);
+
+      const MINUTES_IN_A_WINDOW = minutes_in_a_window || 60000;
+      const REQUEST_PER_WINDOW = request_per_window || 5;
 
       if(diff > MINUTES_IN_A_WINDOW){
         await Redis.hSet(user, 'createdAt', currentTime);

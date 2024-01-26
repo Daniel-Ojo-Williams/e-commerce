@@ -22,12 +22,12 @@ export const GenerateTokenFunction = (user, type) => {
   try {
     if (type === "access_token") {
       const token = jwt.sign({ user }, process.env.JWT_SECRET, {
-        expiresIn: 1000 * 60 * 60,
+        expiresIn: '1hr'
       });
       return token;
     } else {
       const token = jwt.sign({ user }, process.env.JWT_SECRET_REFRESH, {
-        expiresIn: 1000 * 60 * 60 * 24 * 30,
+        expiresIn: '30d'
       });
       return token;
     }
@@ -90,10 +90,11 @@ export const logIn = asyncWrapper(async (req, res) => {
     data,
     "access_token"
   );
-  let refresh_token = GenerateTokenFunction(
+  const refresh_token = GenerateTokenFunction(
     data,
     "refresh_token",
   );
+
 
   // hash refresh token before saving and sending to the frontend
   let refresh_token_hash = await bcrypt.hash(refresh_token, saltRounds);
@@ -112,7 +113,7 @@ export const logIn = asyncWrapper(async (req, res) => {
     refresh_token_exp: REFRESHTOKENEXPIRES,
   };
   const session = await createSession(req, sessionProps);
-  console.log(session);
+
 
   // access token is sent to the frontend through Authroization header
   return res
