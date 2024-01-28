@@ -22,12 +22,12 @@ export const GenerateTokenFunction = (user, type) => {
   try {
     if (type === "access_token") {
       const token = jwt.sign({ user }, process.env.JWT_SECRET, {
-        expiresIn: '1hr'
+        expiresIn: "1hr",
       });
       return token;
     } else {
       const token = jwt.sign({ user }, process.env.JWT_SECRET_REFRESH, {
-        expiresIn: '30d'
+        expiresIn: `${30 * 24 * 60 * 60 * 1000}ms`
       });
       return token;
     }
@@ -86,34 +86,26 @@ export const logIn = asyncWrapper(async (req, res) => {
   };
 
   // generate access token and refresh token
-  const access_token = GenerateTokenFunction(
-    data,
-    "access_token"
-  );
-  const refresh_token = GenerateTokenFunction(
-    data,
-    "refresh_token",
-  );
-
+  const access_token = GenerateTokenFunction(data, "access_token");
+  const refresh_token = GenerateTokenFunction(data, "refresh_token");
 
   // hash refresh token before saving and sending to the frontend
-  let refresh_token_hash = await bcrypt.hash(refresh_token, saltRounds);
+  // let refresh_token_hash = await bcrypt.hash(refresh_token, saltRounds);
 
   // save refresh token to database
   await RefreshToken.save(
     user.user_id,
-    refresh_token_hash,
+    refresh_token,
     REFRESHTOKENEXPIRES
   );
 
   // create session after user successfully logs in
   const sessionProps = {
     user_id: user.user_id,
-    refresh_token: refresh_token_hash,
+    refresh_token: refresh_token,
     refresh_token_exp: REFRESHTOKENEXPIRES,
   };
   const session = await createSession(req, sessionProps);
-
 
   // access token is sent to the frontend through Authroization header
   return res
@@ -135,22 +127,23 @@ export const logIn = asyncWrapper(async (req, res) => {
 
 // clear session info when user logs out
 export const logOut = asyncWrapper(async (req, res) => {
-    const sessionId = req.cookie.sid;
-    await Sessions.invalidateSession(sessionId);
-    return res
-      .clearCookie('sid')
-      .clearCookie('refreshToken', { path: "/auth/refresh" })
-      .header("Authorization", "")
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({ message: "Sign out successful" });
+  const sessionId = req.cookie.sid;
+  await Sessions.invalidateSession(sessionId);
+  return res
+    .clearCookie("sid")
+    .clearCookie("refreshToken", { path: "/auth/refresh" })
+    .header("Authorization", "")
+    .status(StatusCodes.UNAUTHORIZED)
+    .json({ message: "Sign out successful" });
 });
 
 export const refreshToken = asyncWrapper(async (req, res, next) => {
-  const sessionId = req.cookie.sid;
-  if (!sessionId)
-    return next(new CustomError("Session not found", StatusCodes.UNAUTHORIZED));
 
-  const refreshToken = req.cookie.refreshToken;
+  const sessionId = req.cookies.sid;
+  if (!sessionId)
+    return next(new CustomError("Authenticate to get started", StatusCodes.UNAUTHORIZED));
+
+  const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken)
     return next(
@@ -164,20 +157,24 @@ export const refreshToken = asyncWrapper(async (req, res, next) => {
 
   const session = await Sessions.getSession(sessionId);
   if (!session)
-    return next(new CustomError("Session not found", StatusCodes.UNAUTHORIZED));
+    return next(new CustomError("Authenticate to get started", StatusCodes.UNAUTHORIZED));
+  if (!session.is_valid)
+    return next(new CustomError("Authenticate to get started", StatusCodes.UNAUTHORIZED));
 
   // compare the provided refresh token with the refresh token hash
-  const refreshMatch = await bcrypt.compare(
-    refreshToken,
-    session.refresh_token
-  );
+  // const refreshMatch = await bcrypt.compare(
+  //   refreshToken,
+  //   session.refresh_token
+  // );
+  const refreshMatch = refreshToken === session.refresh_token;
+  console.log(refreshMatch)
   // if not match invalidate/block session for user to reauthenticate
   // - clear out cookies also
   if (!refreshMatch) {
     await Sessions.invalidateSession(sessionId);
     return res
-      .clearCookie('sid')
-      .clearCookie('refreshToken', { path: "/auth/refresh" })
+      .clearCookie("sid")
+      .clearCookie("refreshToken", { path: "/auth/refresh" })
       .header("Authorization", "")
       .status(StatusCodes.UNAUTHORIZED)
       .json({ message: "Could not parse token, please reauthenticate" });
@@ -190,6 +187,7 @@ export const refreshToken = asyncWrapper(async (req, res, next) => {
 
   // decode refresh token
   const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_REFRESH);
+  
   let user = decoded.user;
 
   // if match generate new access token and new refresh token
@@ -204,10 +202,13 @@ export const refreshToken = asyncWrapper(async (req, res, next) => {
     REFRESHTOKENEXPIRES
   );
 
+
+
   // hash and update the refresh token in the session db
-  let refresh_token_hash = await bcrypt.hash(newRefreshToken, saltRounds);
+  // let newSalt = await bcrypt.genSalt(12)
+  // let refresh_token_hash = await bcrypt.hash(newRefreshToken, newSalt);
   const keys = ["refresh_token = $1", "refresh_token_exp = $2"];
-  const values = [refresh_token_hash, REFRESHTOKENEXPIRES];
+  const values = [newRefreshToken, REFRESHTOKENEXPIRES];
   await Sessions.updateSession(sessionId, keys, values);
 
   return res

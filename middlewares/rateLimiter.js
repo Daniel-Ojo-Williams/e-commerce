@@ -8,7 +8,7 @@ const rateLimiter = ({identifier='', request_per_window, minutes_in_a_window} = 
       const user = identifier || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
       const currentTime = Date.now();
     
-
+      
       const result = await Redis.hGetAll(user);
       
       if(Object.keys(result).length == 0){
@@ -20,11 +20,13 @@ const rateLimiter = ({identifier='', request_per_window, minutes_in_a_window} = 
       }
       
       let diff = currentTime - parseInt(result.createdAt);
+      
 
       const MINUTES_IN_A_WINDOW = minutes_in_a_window || 60000;
       const REQUEST_PER_WINDOW = request_per_window || 5;
 
       if(diff > MINUTES_IN_A_WINDOW){
+        console.log('here')
         await Redis.hSet(user, 'createdAt', currentTime);
         await Redis.hSet(user, 'count', 1);
         

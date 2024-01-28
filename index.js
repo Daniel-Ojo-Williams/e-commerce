@@ -20,12 +20,15 @@ import cookieParser from "cookie-parser";
 import rateLimiter from "./middlewares/rateLimiter.js";
 import { emailTokenVerification } from "./utils/emailVerification.js";
 import OTPRouter from "./src/resetPassword/routes.js";
+import { refreshToken } from "./src/authentication/controller.js";
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
 app.use("/", OTPRouter);
+app.get("/auth/refresh", rateLimiter({request_per_window: 3, minutes_in_a_window: 1000 * 60 * 10}), refreshToken)
+
 app.use("/auth", rateLimiter(), validateAuthBody, AuthRoute);
 app.use("/verify/:token", emailTokenVerification);
 app.use(sessionMiddleware);
