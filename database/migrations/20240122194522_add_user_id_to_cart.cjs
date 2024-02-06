@@ -17,4 +17,6 @@ EXECUTE FUNCTION create_cart_entry();`
   );
 };
 
-exports.down = function (knex) {};
+exports.down = function (knex) {
+  
+};

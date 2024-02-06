@@ -20,7 +20,7 @@ const sessionMiddleware = async (req, res, next) => {
   req.session = session;
 
   // update session last_active_at
-  const keys = ['last_active_at = $1'];
+  const keys = ['last_active_at = $1']; 
   const values = ['now()'];
   await Sessions.updateSession(sessionId, keys, values);
 

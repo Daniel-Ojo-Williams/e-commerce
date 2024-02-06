@@ -5,7 +5,8 @@ import { redisClient as Redis } from "../utils/sessionStorage.js";
 const rateLimiter = ({identifier='', request_per_window, minutes_in_a_window} = {}) => {
   return async (req, res, next) => {
     try {
-      const user = identifier || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+      // use ip for endpoints that don't don't have access to user id
+      const user = identifier || req.user?.id || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
       const currentTime = Date.now();
     
       
