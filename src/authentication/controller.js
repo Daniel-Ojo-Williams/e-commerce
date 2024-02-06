@@ -167,7 +167,7 @@ export const refreshToken = asyncWrapper(async (req, res, next) => {
   //   session.refresh_token
   // );
   const refreshMatch = refreshToken === session.refresh_token;
-  console.log(refreshMatch)
+  
   // if not match invalidate/block session for user to reauthenticate
   // - clear out cookies also
   if (!refreshMatch) {

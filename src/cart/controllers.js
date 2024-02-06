@@ -50,11 +50,5 @@ export const viewCart = asyncWrapper( async (req, res) => {
   res.status(StatusCodes.OK).json({data: {checkout: summary[0].summary, products: rows}});
 })
 
-export const checkout = asyncWrapper( async ( req, res) => {
-  // name of the product
-  // quantity
-  // price_per_unit 
-  // total price/summary
-  // let {  }
-})
+
 

@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 router.route("/").get(viewCart).post(addItemToCart).delete(removeFromCart);
-router.route("/increaseProductQuantity").put(increaseProductQuantity);
-router.route("/decreaseProductQuantity").put(decreaseProductQuantity);
+router.route("/increaseQuantity").put(increaseProductQuantity);
+router.route("/decreaseQuantity").put(decreaseProductQuantity);
 
 export default router;
